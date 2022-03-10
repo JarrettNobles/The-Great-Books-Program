@@ -232,8 +232,12 @@ public class greatBooksProgram
 	//the enter to continue method
 	private static void enterToContinue()
 	{
-		System.out.print("\n" + "Please press ENTER to continue in the program when you are ready");
+		System.out.print("\n" + "Please press ENTER to continue in the program when you are ready or press M to return to main menu");
 		Scanner scann = new Scanner(System.in);
+		//if(scann.nextLine() = "M")
+		//{
+		//	menu(null);
+		//}
 		scann.nextLine();
 		clearScreen();
 	}
