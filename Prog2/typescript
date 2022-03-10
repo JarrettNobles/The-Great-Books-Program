@@ -1,0 +1,568 @@
+Script started on Sun 27 Feb 2022 02:02:09 PM EST
+]0;nobles_jm@cobra:~/csc205Projects/Prog2[?1034h[nobles_jm@cobra Prog2]$ cat greatBooksProgram.java
+import java.util.*;
+import java.io.*;
+
+
+public class greatBooksProgram
+{
+	public static void main(String[] args)
+	{
+		//clear the screen first and declare the array-list
+		clearScreen();
+		String fileName = startMenu();
+		ArrayList<LibraryBook> books = new ArrayList<LibraryBook>();
+
+		//input book info
+		input(fileName, books);
+		
+		//after inputting the book information, run the main search menu
+		menu(books);
+	}
+
+	//Methods
+	//prints info each library book contains
+	private static void printBooks(ArrayList<LibraryBook> books, int element)
+	{
+		clearScreen();
+		System.out.println("Book # " + (element + 1));
+		System.out.println("\n" + "Title:" + "\t" + "\t" + "\t" + books.get(element).getTitle());
+		System.out.println("Author's Name:" + "\t" + "\t" + books.get(element).getAuthor());
+		System.out.println("Copyright:" + "\t" + "\t" + books.get(element).getCopyright());
+		System.out.println("Price:" + "\t" + "\t" + "\t" + books.get(element).getPrice());
+		System.out.println("Genre:" + "\t" + "\t" + "\t" + books.get(element).getGenre());
+		enterToContinue();
+
+		
+	}
+
+	//runs through a loop to display all the books in the file
+	public static void displayRecords(ArrayList<LibraryBook> books)
+	{
+		for(int i = 0; i < books.size(); i++)
+		{
+			printBooks(books, i);
+		}
+	}
+
+	//this is the display menu to view or search for books that are recorded
+	private static void printDisplayMenu()
+	{
+	  	 System.out.println("\n" + "THE GREAT BOOKS SEARCH PROGRAM");
+       		 System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+       		 System.out.println("\n" + "1) Display all books recorded");
+       		 System.out.println("\n" + "2) Search for a book by title");
+       		 System.out.println("\n" + "3) Exit");
+       		 System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+        	 System.out.print("Please Enter Your Choice >  ");
+	}
+
+	//menu loop for if the user pickes between 1-3
+	private static void menu(ArrayList<LibraryBook> books)
+	{
+		printDisplayMenu();
+		Scanner in = new Scanner(System.in);
+		int option = 0;
+		while(option!= 3)
+		{
+			option = in.nextInt();
+			int pick;
+			switch(option)
+			{
+				case 1: displayRecords(books);
+					printDisplayMenu();
+					break;
+				
+				case 2: pick = findBook(books);
+					if(pick == -1)
+					{
+						System.out.println("Sorry, the book you entered was not found");
+						System.out.print("Please enter a valid option:  ");
+					}
+					else
+					{
+						printBooks(books, pick);
+						clearScreen();
+						printDisplayMenu();
+					}
+					break;
+				
+				case 3: clearScreen();
+					System.out.println("Exit chosen, goodbye!");
+					break;
+				
+				default: clearScreen();	
+					printDisplayMenu();
+					System.out.println("That is not an option. Please enter a valid option.");
+					break;
+			}
+		}
+	}
+
+	//this method finds the files in the directory with the .dat format, and prints them
+	public static String bookFiles()
+	{
+		
+	       	File curDir = new File(".");
+		String[] fileNames = curDir.list();
+       		ArrayList<String> data = new ArrayList<String>();
+	
+		for(String s:fileNames)
+		{
+        		if(s.endsWith(".dat"))
+			{	
+               			data.add(s);
+			}
+
+		}
+
+		String files = "";
+		for(String element: data)
+		{
+			files += (element + "  ");
+		}
+		return files;
+
+	}
+
+	//The selection sort method
+	public static void sortBooks(ArrayList<LibraryBook> books)
+	{
+		int minIndex, index, j;
+		LibraryBook temp;
+
+		for(index = 0; index < books.size() - 1; index++)
+		{
+			minIndex = index;
+			for(j = minIndex + 1; j < books.size(); j++)
+			{
+				if(books.get(j).getTitle().compareTo(books.get(minIndex).getTitle()) < 0)
+				{
+					minIndex = j;
+				}
+			}
+
+			if(minIndex != index)
+			{
+				temp = books.get(index);
+				books.set(index, books.get(minIndex));
+				books.set(minIndex, temp);
+			}
+		}
+
+	}
+
+	//this method will find the books
+	private static int findBook(ArrayList<LibraryBook> books)
+	{
+		int element = 0; 
+		String title = "";
+		System.out.print("Enter book title: ");
+		Scanner in = new Scanner(System.in);
+		title = in.nextLine();
+
+		int first = 0; 
+		int last = books.size() - 1;
+		int  middle;
+		boolean found = false;
+
+		do
+		{
+			middle = (first + last) / 2;
+			if((books.get(middle)).getTitle().compareTo(title) == 0)
+			{
+				found = true;
+			}
+		
+			else if(books.get(middle).getTitle().compareTo(title) > 0)
+			{
+				last = middle - 1;
+			}
+			else
+			{
+				first = middle + 1;
+			}
+
+		} 
+		while((!found) && (first <= last));
+		
+		element = middle;
+		
+		return(found ? element : -1);
+
+	}
+
+	//clear screen method
+	private static void clearScreen()
+	{
+       		System.out.println("\u001b[H\u001b[2J");
+   	}
+
+	//inputs title, author name,copyright, price, genre, also has try catch statement
+	public static int input(String fileName, ArrayList<LibraryBook> books)
+	{
+		int numbooks = 0;
+		try
+		{
+			Scanner scan = new Scanner(new File(fileName));
+			while(scan.hasNext())
+			{
+				Scanner in = new Scanner(scan.nextLine()).useDelimiter(";");
+				String title = in.next();
+				String name = in.next();
+				int copyright = in.nextInt();
+				double price = in.nextDouble();
+				String genre = in.next();
+				books.add(new LibraryBook(title, name, copyright, price, genre));
+				numbooks++;
+			}
+			
+		}
+
+		catch(IOException e)
+		{
+			System.out.println(e.getMessage());
+		}
+
+		sortBooks(books);
+		System.out.println("\n" + "There are a total of " + numbooks + " books in your file that you entered.");
+		enterToContinue();
+		clearScreen();
+		return numbooks;	
+	}
+	
+	//the enter to continue method
+	private static void enterToContinue()
+	{
+		System.out.print("\n" + "Please press ENTER to continue in the program when you are ready");
+		Scanner scann = new Scanner(System.in);
+		scann.nextLine();
+		clearScreen();
+	}
+	
+	//menu that runs at startup,	
+	public static String startMenu()
+	{
+		clearScreen();
+		System.out.println("\n" + "\tWELCOME TO THE GREAT BOOKS PROGRAM");
+		System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+		System.out.println("\n" + "Here are the current files in your directory, please select which one you would like to choose");
+		System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+		System.out.println("\n" + bookFiles());
+		Scanner scan = new Scanner(System.in);
+		String result = scan.nextLine();
+		return result;
+	}
+
+}
+]0;nobles_jm@cobra:~/csc205Projects/Prog2[nobles_jm@cobra Prog2]$ javac greatBooksProgram.java
+]0;nobles_jm@cobra:~/csc205Projects/Prog2[nobles_jm@cobra Prog2]$ java greatBooksProgram
+[H[2J
+[H[2J
+
+	WELCOME TO THE GREAT BOOKS PROGRAM
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Here are the current files in your directory, please select which one you would like to choose
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+library.dat  play.dat  
+library.dat
+
+There are a total of 15 books in your file that you entered.
+
+Please press ENTER to continue in the program when you are ready
+[H[2J
+[H[2J
+
+THE GREAT BOOKS SEARCH PROGRAM
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+1) Display all books recorded
+
+2) Search for a book by title
+
+3) Exit
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Please Enter Your Choice >  1
+[H[2J
+Book # 1
+
+Title:			Animal Farm
+Author's Name:		Orwell, George
+Copyright:		1978
+Price:			10.0
+Genre:			f
+
+Please press ENTER to continue in the program when you are ready
+[H[2J
+[H[2J
+Book # 2
+
+Title:			Canterbury Tales
+Author's Name:		Chaucer, Geoffrey
+Copyright:		1965
+Price:			20.0
+Genre:			d
+
+Please press ENTER to continue in the program when you are ready
+[H[2J
+[H[2J
+Book # 3
+
+Title:			Christmas Carol
+Author's Name:		Dickens, Charles
+Copyright:		1966
+Price:			12.5
+Genre:			f
+
+Please press ENTER to continue in the program when you are ready
+[H[2J
+[H[2J
+Book # 4
+
+Title:			Great Gatsby
+Author's Name:		Fitzgerald, F. Scott
+Copyright:		1979
+Price:			5.99
+Genre:			f
+
+Please press ENTER to continue in the program when you are ready
+[H[2J
+[H[2J
+Book # 5
+
+Title:			Heart of Darkness
+Author's Name:		Conrad, Joseph
+Copyright:		1970
+Price:			14.45
+Genre:			f
+
+Please press ENTER to continue in the program when you are ready
+[H[2J
+[H[2J
+Book # 6
+
+Title:			Last of the Mohicans
+Author's Name:		Cooper, James Fenimore
+Copyright:		1968
+Price:			8.75
+Genre:			f
+
+Please press ENTER to continue in the program when you are ready
+[H[2J
+[H[2J
+Book # 7
+
+Title:			Leaves of Grass
+Author's Name:		Whitman, Walt
+Copyright:		1975
+Price:			29.99
+Genre:			p
+
+Please press ENTER to continue in the program when you are ready
+[H[2J
+[H[2J
+Book # 8
+
+Title:			Les Miserables
+Author's Name:		Hugo, Victor
+Copyright:		1988
+Price:			19.98
+Genre:			f
+
+Please press ENTER to continue in the program when you are ready
+[H[2J
+[H[2J
+Book # 9
+
+Title:			Moby Dick
+Author's Name:		Melville, Herman
+Copyright:		1962
+Price:			13.98
+Genre:			f
+
+Please press ENTER to continue in the program when you are ready
+[H[2J
+[H[2J
+Book # 10
+
+Title:			Odyssey
+Author's Name:		Homer
+Copyright:		1950
+Price:			9.99
+Genre:			f
+
+Please press ENTER to continue in the program when you are ready
+[H[2J
+[H[2J
+Book # 11
+
+Title:			Old Man and the Sea
+Author's Name:		Hemingway, Ernest
+Copyright:		1966
+Price:			9.95
+Genre:			f
+
+Please press ENTER to continue in the program when you are ready
+[H[2J
+[H[2J
+Book # 12
+
+Title:			Romeo and Juliet
+Author's Name:		Shakespeare, William
+Copyright:		1980
+Price:			4.99
+Genre:			d
+
+Please press ENTER to continue in the program when you are ready
+[H[2J
+[H[2J
+Book # 13
+
+Title:			Scarlet Letter
+Author's Name:		Hawthorne, Nathaniel
+Copyright:		1981
+Price:			4.78
+Genre:			f
+
+Please press ENTER to continue in the program when you are ready
+[H[2J
+[H[2J
+Book # 14
+
+Title:			Tom Sawyer
+Author's Name:		Twain, Mark
+Copyright:		1972
+Price:			8.5
+Genre:			f
+
+Please press ENTER to continue in the program when you are ready
+[H[2J
+[H[2J
+Book # 15
+
+Title:			Whisper of the River
+Author's Name:		Sams, Ferrol
+Copyright:		1984
+Price:			21.95
+Genre:			f
+
+Please press ENTER to continue in the program when you are ready
+[H[2J
+
+THE GREAT BOOKS SEARCH PROGRAM
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+1) Display all books recorded
+
+2) Search for a book by title
+
+3) Exit
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Please Enter Your Choice >  2
+Enter book title: Odyssey
+[H[2J
+Book # 10
+
+Title:			Odyssey
+Author's Name:		Homer
+Copyright:		1950
+Price:			9.99
+Genre:			f
+
+Please press ENTER to continue in the program when you are ready
+[H[2J
+[H[2J
+
+THE GREAT BOOKS SEARCH PROGRAM
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+1) Display all books recorded
+
+2) Search for a book by title
+
+3) Exit
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Please Enter Your Choice >  2
+Enter book title: Animal Farm
+[H[2J
+Book # 1
+
+Title:			Animal Farm
+Author's Name:		Orwell, George
+Copyright:		1978
+Price:			10.0
+Genre:			f
+
+Please press ENTER to continue in the program when you are ready
+[H[2J
+[H[2J
+
+THE GREAT BOOKS SEARCH PROGRAM
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+1) Display all books recorded
+
+2) Search for a book by title
+
+3) Exit
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Please Enter Your Choice >  2
+Enter book title: Last of the Mohicans
+[H[2J
+Book # 6
+
+Title:			Last of the Mohicans
+Author's Name:		Cooper, James Fenimore
+Copyright:		1968
+Price:			8.75
+Genre:			f
+
+Please press ENTER to continue in the program when you are ready
+[H[2J
+[H[2J
+
+THE GREAT BOOKS SEARCH PROGRAM
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+1) Display all books recorded
+
+2) Search for a book by title
+
+3) Exit
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Please Enter Your Choice >  2
+Enter book title: Whisper of the River
+[H[2J
+Book # 15
+
+Title:			Whisper of the River
+Author's Name:		Sams, Ferrol
+Copyright:		1984
+Price:			21.95
+Genre:			f
+
+Please press ENTER to continue in the program when you are ready
+[H[2J
+[H[2J
+
+THE GREAT BOOKS SEARCH PROGRAM
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+1) Display all books recorded
+
+2) Search for a book by title
+
+3) Exit
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Please Enter Your Choice >  2
+Enter book title: Macbeth
+Sorry, the book you entered was not found
+Please enter a valid option:  3
+[H[2J
+Exit chosen, goodbye!
+]0;nobles_jm@cobra:~/csc205Projects/Prog2[nobles_jm@cobra Prog2]$ exit
+exit
+
+Script done on Sun 27 Feb 2022 02:04:03 PM EST
